@@ -134,6 +134,19 @@ class MultiMoE:
 
         print(f"n_layer:{self.n_layer}, n_expert:{self.n_expert}")
 
+
+
+        self.expert_dist = np.zeros((self.n_layer, self.n_expert), dtype=float)
+        self.expert_map = np.zeros((self.n_layer, self.n_expert), dtype=int)
+        self.expert_map[:] = -1
+
+
+
+        self.measure_model_dist()
+        self.sort_expert_differences()
+
+        # print(self.expert_dist)
+
         self.total_available_memory = args.total_available_memory
 
         self.expert_placeholder = copy.deepcopy(
@@ -170,7 +183,11 @@ class MultiMoE:
         )
 
         self.set_expert_loc()
-        # self.model_locations.print_locations()
+
+        print("koskoskoskos expert map")
+        print(self.expert_map)
+
+        self.model_locations.print_locations()
 
         self.bring_expert_to_gpu()
 
@@ -180,7 +197,45 @@ class MultiMoE:
 
         print("Model is ready.")
 
-         
+
+    def flatten_expert_weights(self, expert_module):
+
+
+        # Access and flatten the weights of each layer
+        w1_flattened = expert_module.w1.weight.flatten()
+        w2_flattened = expert_module.w2.weight.flatten()
+        w3_flattened = expert_module.w3.weight.flatten()
+        
+        # Concatenate the flattened weights into a single tensor
+        all_flattened_weights = torch.cat([w1_flattened, w2_flattened, w3_flattened])
+        
+        return all_flattened_weights
+
+    def measure_model_dist(self):
+
+        for i_layer in range(self.n_layer):
+            for i_expert in range(self.n_expert):
+                #This works when we run two models. Fix here for more than 2 number of models
+                temp_expert_1 = self.flatten_expert_weights(self.models[self.model_ids[0]].model.layers[i_layer].block_sparse_moe.experts[i_expert])
+                temp_expert_2 = self.flatten_expert_weights(self.models[self.model_ids[1]].model.layers[i_layer].block_sparse_moe.experts[i_expert])
+                l2_norm = torch.norm( temp_expert_1 - temp_expert_2, p=2).item()
+                self.expert_dist[i_layer][i_expert] = l2_norm
+
+
+    def sort_expert_differences(self):
+        # Create a list of tuples where each tuple is ((layer_index, expert_index), difference_value)
+        differences_with_indices = [
+            ((i_layer, i_expert), self.expert_dist[i_layer][i_expert])
+            for i_layer in range(len(self.expert_dist))
+            for i_expert in range(len(self.expert_dist[i_layer]))
+        ]
+        
+        # Sort the list by the difference values (the second element of each tuple)
+        sorted_differences = sorted(differences_with_indices, key=lambda x: x[1])
+
+        self.expert_dist = sorted_differences
+        
+
 
     def set_main_model_head(self):
         self.main_model_id = self.model_layout["non_expert"]
@@ -202,14 +257,24 @@ class MultiMoE:
 
 
     def set_expert_loc(self):
-        all_expert_positions = [(i, j) for i in range(self.n_layer) for j in range(self.n_expert)]
+        # all_expert_positions = [(i, j) for i in range(self.n_layer) for j in range(self.n_expert)]
 
-        gpu_expert_positions = random.sample(all_expert_positions, self.n_experts_on_gpu)
+        # gpu_expert_positions = random.sample(all_expert_positions, self.n_experts_on_gpu)
+
+        gpu_expert_positions = [item[0] for item in self.expert_dist[:self.n_experts_on_gpu]]
+        # print(gpu_expert_positions)
 
         # Set the selected positions to 1 (place them on GPU)
-        for i_layer, i_expert in gpu_expert_positions:
+        for i in range(self.n_experts_on_gpu):
+            i_layer, i_expert = gpu_expert_positions[i]
             layer_key = "expert_layer_" + str(i_layer)
-            self.model_locations.locations["expert_locations"][self.model_layout[layer_key]][i_layer, i_expert] = 1 
+            self.model_locations.locations["expert_locations"][self.model_ids[i%len(self.model_ids)]][i_layer, i_expert] = 1
+            self.expert_map[i_layer][i_expert] = i%len(self.model_ids)
+        
+        
+        # for i_layer, i_expert in gpu_expert_positions:
+        #     layer_key = "expert_layer_" + str(i_layer)
+        #     self.model_locations.locations["expert_locations"][self.model_layout[layer_key]][i_layer, i_expert] = 1 
 
 
             
@@ -219,15 +284,19 @@ class MultiMoE:
         for i_layer in range(self.n_layer):
             for i_expert in range(self.n_expert):
                 if self.is_expert_in_gpu(i_layer, i_expert):
-                    layer_key = "expert_layer_" + str(i_layer)
-                    layer_model = self.model_layout[layer_key]
-                    self.models[layer_model].model.layers[i_layer].block_sparse_moe.experts[i_expert].to(self.dev)
+                    temp_model_name = self.model_ids[self.expert_map[i_layer][i_expert]]
+                    self.models[temp_model_name].model.layers[i_layer].block_sparse_moe.experts[i_expert].to(self.dev)
                     # self.model.layers[i_layer].block_sparse_moe.experts[i_expert].to(self.dev)
 
     def is_expert_in_gpu(self, i_layer, i_expert):
         """Determine if the expert is in GPU"""
-        layer_key = "expert_layer_" + str(i_layer)
-        return self.model_locations.locations["expert_locations"][self.model_layout[layer_key]][i_layer, i_expert]
+        # layer_key = "expert_layer_" + str(i_layer)
+        # return self.model_locations.locations["expert_locations"][self.model_layout[layer_key]][i_layer, i_expert]
+
+        if(self.expert_map[i_layer][i_expert]  == -1):
+            return False
+        else:
+            return True
 
     def calc_n_experts_on_gpu(self):
         """Get the number of experts that we can put on GPU"""
@@ -456,7 +525,8 @@ class MultiMoE:
                     # )
                 else:
                     hit_count = hit_count + 1
-                    current_state = self.models[self.model_layout[layer_key]].model.layers[i_layer].block_sparse_moe.experts[i_expert](
+                    temp_model_name = self.model_ids[self.expert_map[i_layer][i_expert]]
+                    current_state = self.models[temp_model_name].model.layers[i_layer].block_sparse_moe.experts[i_expert](
                         current_state, routing_weights[top_2_list, idx_list, None]
                     )
                     # current_state = self.models[self.model_layout[layer_key]].model.layers[i_layer].block_sparse_moe.experts[i_expert](
@@ -477,7 +547,7 @@ class MultiMoE:
                 
 
                 if not is_cuda:
-                    self.models[self.model_layout[layer_key]].model.layers[i_layer].block_sparse_moe.experts[i_expert] = self.models[self.model_layout[layer_key]].model.layers[i_layer].block_sparse_moe.experts[i_expert].to(
+                    self.models[self.model_layout["non_expert"]].model.layers[i_layer].block_sparse_moe.experts[i_expert] = self.models[self.model_layout["non_expert"]].model.layers[i_layer].block_sparse_moe.experts[i_expert].to(
                         "cpu", non_blocking=True
                     )
 
