@@ -1,0 +1,20 @@
+(ml) [root@gpu01 Multi-MoE]# python print_results_mmlu.py --eval_name multi-MoE --eval_type tqa
+|     |   Accuracy |
+|-----+------------|
+| All |      70.6% |
+(ml) [root@gpu01 Multi-MoE]# python print_results_mmlu.py --eval_name instruct --eval_type tqa
+|     |   Accuracy |
+|-----+------------|
+| All |      73.6% |
+(ml) [root@gpu01 Multi-MoE]# python print_results_mmlu.py --eval_name base --eval_type tqa
+|     |   Accuracy |
+|-----+------------|
+| All |      66.6% |
+(ml) [root@gpu01 Multi-MoE]# python print_results_mmlu.py --eval_name avg --eval_type tqa
+|     |   Accuracy |
+|-----+------------|
+| All |      73.0% |
+(ml) [root@gpu01 Multi-MoE]# python print_results_mmlu.py --eval_name multi-MoE-No-Reconfig --eval_type tqa
+|     |   Accuracy |
+|-----+------------|
+| All |      69.7% |

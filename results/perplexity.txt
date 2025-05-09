@@ -1,0 +1,25 @@
+Perplexity (Lower better)
+
+
+WikiText:
+Instruct: 4.12
+Base: 3.81
+Multi-MoE: 3.85
+Multi-MoE-No-Reconfig: 4.05
+Avg: 3.89
+
+C4:
+Instruct: 7.62
+Base: 7.24
+Multi-MoE: 7.33
+Multi-MoE-No-Reconfig: 7.55
+Avg: 7.38
+
+PTB:
+Instruct: 14.60
+Base: 13.59
+Multi-MoE: 13.90
+Multi-MoE-No-Reconfig: 13.12
+Avg: 13.44
+
+

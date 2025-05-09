@@ -1,0 +1,5 @@
+avg: 0.82
+base: 0.811
+instruct: 0.83
+multi-MoE: 0.822
+multi-MoE-No-Reconfig:0.812

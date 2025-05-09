@@ -1,0 +1,15 @@
+{
+    "turnaround_time": [
+        55.61884045600891
+    ],
+    "wait_time": [
+        8.463859558105469e-05
+    ],
+    "TTFT": [
+        6.801973581314087
+    ],
+    "throughput": 0.5,
+    "average_turnaround_time": 55.61884045600891,
+    "average_wait_time": 8.463859558105469e-05,
+    "average_TTFT": 6.801973581314087
+}

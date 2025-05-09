@@ -1,0 +1,55 @@
+Mode: single
+Input file: data/mt_bench/model_judgment/gpt-4_single.jsonl
+
+########## First turn ##########
+                                    score
+model                       turn         
+Mixtral-avg                 1     8.38125
+Mixtral-8x7B-Multi-MoE-v0.2 1     8.33750
+Mixtral-8x7B-Instruct-v0.1  1     8.28750
+Mixtral-8x7B-v0.1           1     3.01875
+
+########## Second turn ##########
+                                     score
+model                       turn          
+Mixtral-8x7B-Instruct-v0.1  2     7.987500
+Mixtral-8x7B-Multi-MoE-v0.2 2     7.987500
+Mixtral-avg                 2     7.612500
+Mixtral-8x7B-v0.1           2     2.162162
+
+########## Average ##########
+                                score
+model                                
+Mixtral-8x7B-Multi-MoE-v0.2  8.162500
+Mixtral-8x7B-Instruct-v0.1   8.137500
+Mixtral-avg                  7.996875
+Mixtral-8x7B-v0.1            2.607143
+
+
+
+########## First turn ##########
+                                    score
+model                       turn         
+Mixtral-avg                 1     8.38125
+Mixtral-8x7B-Multi-MoE-v0.2 1     8.33750
+Mixtral-8x7B-Instruct-v0.1  1     8.28750
+Mixtral-No-Reconfig         1     8.06875
+Mixtral-8x7B-v0.1           1     3.01875
+
+########## Second turn ##########
+                                     score
+model                       turn          
+Mixtral-8x7B-Instruct-v0.1  2     7.987500
+Mixtral-8x7B-Multi-MoE-v0.2 2     7.987500
+Mixtral-avg                 2     7.612500
+Mixtral-No-Reconfig         2     7.350000
+Mixtral-8x7B-v0.1           2     2.162162
+
+########## Average ##########
+                                score
+model                                
+Mixtral-8x7B-Multi-MoE-v0.2  8.162500
+Mixtral-8x7B-Instruct-v0.1   8.137500
+Mixtral-avg                  7.996875
+Mixtral-No-Reconfig          7.709375
+Mixtral-8x7B-v0.1            2.607143

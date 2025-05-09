@@ -1,0 +1,9 @@
+{
+    "turnaround_time": [],
+    "wait_time": [],
+    "TTFT": [],
+    "throughput": 0.0,
+    "average_turnaround_time": 0,
+    "average_wait_time": 0,
+    "average_TTFT": 0
+}
