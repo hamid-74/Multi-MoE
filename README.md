@@ -103,11 +103,14 @@ Result files can be found in the `results/` directory.
 
 If you find this work useful for your research, please cite our paper:
 ```
-@inproceedings{imani2025qos,
-  title={QoS-Efficient Serving of Multiple Mixture-of-Expert LLMs Using Partial Runtime Reconfiguration},
-  author={Imani, HamidReza and Peng, Jiaxin and Mohseni, Peiman and Amirany, Abdolah and El-Ghazawi, Tarek},
-  booktitle={International Conference on Machine Learning},
-  year={2025}
+@misc{imani2025qosefficientservingmultiplemixtureofexpert,
+      title={QoS-Efficient Serving of Multiple Mixture-of-Expert LLMs Using Partial Runtime Reconfiguration}, 
+      author={HamidReza Imani and Jiaxin Peng and Peiman Mohseni and Abdolah Amirany and Tarek El-Ghazawi},
+      year={2025},
+      eprint={2505.06481},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2505.06481}, 
 }
 ```
 
